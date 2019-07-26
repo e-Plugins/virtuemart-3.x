@@ -15,7 +15,7 @@ namespace targetpay\helpers;
  */
 class TargetPayCore
 {
-    const APP_ID = "dw_virtuemart3.x_4.0.0";
+    const APP_ID = "dw_virtuemart3.x_4.0.1";
 
     // Constants
     const MIN_AMOUNT            = 84;

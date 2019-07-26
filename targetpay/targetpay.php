@@ -5,8 +5,7 @@
  * @author TargetPay.
  * @url http://www.idealplugins.nl
  * @release 22-11-2016
- * @ver 3.1
- * Changes: Fix bug & refactor code
+ * @ver 4.0.1 - 15-7-2019 Minor bug fixes and URL update
  */
 
 use targetpay\helpers\TargetPayCore;
@@ -222,6 +221,11 @@ class plgVmpaymentTargetpay extends vmPSPlugin
         $reportUrl = JROUTE::_(JURI::root() . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginnotification&tmpl=component&on=' . $order_number);
         $targetpayObj->setReturnUrl($returnUrl);
         $targetpayObj->setReportUrl($reportUrl);
+        //add param email in start url
+        if (!empty($order['details']['BT']->email)) {
+            $targetpayObj->bindParam('email', $order['details']['BT']->email);
+        }
+
         $this->additionalParameters($order, $targetpayObj, $total);
 
         $result = @$targetpayObj->startPayment();
