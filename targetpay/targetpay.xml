@@ -6,7 +6,7 @@
     <authorUrl>https://www.digiwallet.nl</authorUrl>
     <copyright>Copyright (C) 2018 DigiWallet</copyright>
     <license>http://www.gnu.org/licenses/gpl-3.0.html GNU/GPL</license>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
     <description><![CDATA[<a href="https://www.digiwallet.nl" target="_blank">DigiWallet</a> ... makes online payments easy.]]></description>
   
     <languages folder="language">
