@@ -1,18 +1,16 @@
 <?php
-
 namespace digiwallet\helpers;
 
-/**
- * @file     Provides support for Digiwallet iDEAL, Bancontact and Sofort Banking
- * @author     Digiwallet
- * @url         https://www.digiwallet.nl
- * @release     22-11-2016
- * @ver         2.4
- */
+defined ('_JEXEC') or die();
 
 /**
- * @class Digiwallet Core class
- */
+ * Activates iDEAL, Bancontact, Sofort Banking, Visa / Mastercard Credit cards, PaysafeCard, AfterPay, BankWire, PayPal and Refunds in VirtueMart
+ * @author DigiWallet.nl <techsupport@targetmedia.nl>
+ * @url https://www.digiwallet.nl
+ * @copyright Copyright (C) 2018 - 2020 e-plugins.nl
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+*/
+
 class DigiwalletCore
 {
     const APP_ID = "dw_virtuemart3.x_4.0.2";
@@ -195,9 +193,6 @@ class DigiwalletCore
             $this->errorMessage = self::ERR_SOFORT_NO_COUNTRY;
             return false;
         }
-        $this->returnUrl = str_replace("%payMethod%", $this->payMethod, $this->returnUrl);
-        $this->cancelUrl = str_replace("%payMethod%", $this->payMethod, $this->cancelUrl);
-        $this->reportUrl = str_replace("%payMethod%", $this->payMethod, $this->reportUrl);
 
         $url = $this->startAPIs[$this->payMethod];
         switch ($this->payMethod) {

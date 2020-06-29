@@ -1,11 +1,11 @@
 <?php
 /**
- *
- * Digiwallet payment plugin
- *
- * @author Harry
- * @package Digiwallet
- */
+ * Activates iDEAL, Bancontact, Sofort Banking, Visa / Mastercard Credit cards, PaysafeCard, AfterPay, BankWire, PayPal and Refunds in VirtueMart
+ * @author DigiWallet.nl <techsupport@targetmedia.nl>
+ * @url https://www.digiwallet.nl
+ * @copyright Copyright (C) 2018 - 2020 e-plugins.nl
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+*/
 
 defined('_JEXEC') or die();
 vmJsApi::addJScript('/plugins/vmpayment/digiwallet/digiwallet/assets/js/site.js');
@@ -53,7 +53,7 @@ if (VmConfig::get('oncheckout_ajax', false)) {
         <div class="method_<?=$paymentOption; ?>">
             <input id="digiwallet_method_<?=$paymentOption; ?>" name="digiwallet_method" value="<?=$paymentOption; ?>" <?=$checked_method ?> type="radio">
             <label for="digiwallet_method_<?=$paymentOption; ?>">
-                <img class="digiwallet-method-icon" src="<?= JROUTE::_('/plugins/vmpayment/digiwallet/digiwallet/assets/images/method-' . strtolower($paymentOption) . '.png'); ?>" title="<?=JText::_('VMPAYMENT_DIGIWALLET_PAYMENT_OPTION_' . $paymentOption); ?>">
+                <img class="digiwallet-method-icon" src="<?= JURI::base() . JROUTE::_('plugins/vmpayment/digiwallet/digiwallet/assets/images/method-' . strtolower($paymentOption) . '.png'); ?>" title="<?=JText::_('VMPAYMENT_DIGIWALLET_PAYMENT_OPTION_' . $paymentOption); ?>">
             </label>
             <?php if ($bankListCount == 0) :?>
                 <?= JText::_('VMPAYMENT_DIGIWALLET_PAYMENT_OPTION_NOT_FOUNT'); ?>

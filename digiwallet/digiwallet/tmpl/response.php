@@ -1,11 +1,11 @@
 <?php
 /**
- *
- * Digiwallet payment plugin
- *
- * @author Harry
- * @package Digiwallet
- */
+ * Activates iDEAL, Bancontact, Sofort Banking, Visa / Mastercard Credit cards, PaysafeCard, AfterPay, BankWire, PayPal and Refunds in VirtueMart
+ * @author DigiWallet.nl <techsupport@targetmedia.nl>
+ * @url https://www.digiwallet.nl
+ * @copyright Copyright (C) 2018 - 2020 e-plugins.nl
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+*/
 
 defined('_JEXEC') or die();
 vmJsApi::css('digiwallet', 'plugins/vmpayment/digiwallet/digiwallet/assets/css/');

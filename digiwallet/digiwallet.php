@@ -1,22 +1,22 @@
 <?php
 /**
- * @file Provides support for Digiwallet iDEAL, Bancontact and Sofort Banking
- *
- * @author Digiwallet.
- * @url http://www.idealplugins.nl
- * @release 22-11-2016
- * @ver 4.0.2 - 04-12-2019 Adjust plugins to DigiWallet
- */
+ * Activates iDEAL, Bancontact, Sofort Banking, Visa / Mastercard Credit cards, PaysafeCard, AfterPay, BankWire, PayPal and Refunds in VirtueMart
+ * @author DigiWallet.nl <techsupport@targetmedia.nl>
+ * @url https://www.digiwallet.nl
+ * @copyright Copyright (C) 2018 - 2020 e-plugins.nl
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @ver 4.0.3 - 06-24-2020 set automaticSelectedPayment to false
+*/
 
 use digiwallet\helpers\DigiwalletCore;
 
 defined('_JEXEC') or die('Restricted access');
 if (!class_exists('vmPSPlugin')) {
-    require(JPATH_VM_PLUGINS . DS . 'vmpsplugin.php');
+    require(JPATH_VM_PLUGINS . '/vmpsplugin.php');
 }
 
 if (!class_exists('DigiwalletCore')) {
-    require(JPATH_ROOT . DS . 'plugins' . DS . 'vmpayment' . DS . 'digiwallet' . DS . 'digiwallet' . DS . 'helpers' . DS . 'digiwallet.class.php');
+    require(JPATH_ROOT . '/plugins/vmpayment/digiwallet/digiwallet/helpers/digiwallet.class.php');
 }
 
 class plgVmpaymentDigiwallet extends vmPSPlugin
@@ -76,7 +76,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         parent::__construct($subject, $config);
         // unique filelanguage for all digiwallet methods
         $jlang = JFactory::getLanguage();
-        $jlang->load('plg_vmpayment_digiwallet', JPATH_PLUGINS . DS . 'vmpayment/digiwallet', null, true);
+        $jlang->load('plg_vmpayment_digiwallet', JPATH_PLUGINS . '/vmpayment/digiwallet', null, true);
         $this->_loggable = true;
         $this->_debug = true;
         $this->tableFields = array_keys($this->getTableSQLFields());
@@ -164,6 +164,8 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
     public function plgVmConfirmedOrder($cart, $order)
     {
         $application = JFactory::getApplication();
+        $jinput = $application->input;
+        $post_data = $jinput->post->getArray();
         if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
             return null; // Another method was selected, do nothing
         }
@@ -179,14 +181,14 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         $this->logInfo('plgVmConfirmedOrder order number: ' . $order['details']['BT']->order_number, 'message');
 
         if (!class_exists('VirtueMartModelOrders')) {
-            require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
+            require(JPATH_VM_ADMINISTRATOR . '/models/orders.php');
         }
         if (!class_exists('VirtueMartModelCurrency')) {
-            require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'currency.php');
+            require(JPATH_VM_ADMINISTRATOR . '/models/currency.php');
         }
 
         if (!class_exists('TableVendors')) {
-            require(JPATH_VM_ADMINISTRATOR . DS . 'table' . DS . 'vendors.php');
+            require(JPATH_VM_ADMINISTRATOR . '/table/vendors.php');
         }
         $totalInPaymentCurrency = vmPSPlugin::getAmountInCurrency($order['details']['BT']->order_total, $method->payment_currency);
         $total = $totalInPaymentCurrency['value'];
@@ -194,7 +196,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
             vmInfo(JText::_('VMPAYMENT_DIGIWALLET_PAYMENT_AMOUNT_INCORRECT'));
             return false;
         }
-        $payment_method = $_POST['digiwallet_method'];
+        $payment_method = $post_data['digiwallet_method'];
         if (!$payment_method) {
             vmError(JText::_('VMPAYMENT_DIGIWALLET_PAYMENT_EMPTY_PAYMENT_METHOD'));
             $application->redirect('index.php?option=com_virtuemart&view=cart');
@@ -204,10 +206,10 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         $tag = substr($lang->get('tag'), 0, 2);
 
         $order_number = $order['details']['BT']->order_number;
-        $option = (!empty($_POST['payment_option_select'][$_POST['digiwallet_method']]) ? $_POST['payment_option_select'][$_POST['digiwallet_method']] : false);
+        $option = (!empty($post_data['payment_option_select'][$post_data['digiwallet_method']]) ? $post_data['payment_option_select'][$post_data['digiwallet_method']] : false);
         $description = 'Order id: ' . $order_number;
         // start payment
-        $digiwalletObj = new DigiwalletCore($_POST['digiwallet_method'], $method->digiwallet_rtlo, 'nl');
+        $digiwalletObj = new DigiwalletCore($post_data['digiwallet_method'], $method->digiwallet_rtlo, 'nl');
         if ($option) {
             if ($digiwalletObj->getPayMethod() == 'IDE')
                 $digiwalletObj->setBankId($option);
@@ -289,13 +291,13 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         $jinput = JFactory::getApplication()->input;
 
         if (!class_exists('VirtueMartCart')) {
-            require(JPATH_VM_SITE . DS . 'helpers' . DS . 'cart.php');
+            require(JPATH_VM_SITE . '/helpers/cart.php');
         }
         if (!class_exists('shopFunctionsF')) {
-            require(JPATH_VM_SITE . DS . 'helpers' . DS . 'shopfunctionsf.php');
+            require(JPATH_VM_SITE . '/helpers/shopfunctionsf.php');
         }
         if (!class_exists('VirtueMartModelOrders')) {
-            require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
+            require(JPATH_VM_ADMINISTRATOR . '/models/orders.php');
         }
 
         // the payment itself should send the parameter needed.
@@ -360,9 +362,9 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
     {
         $jinput = JFactory::getApplication()->input;
         if (!class_exists('VirtueMartModelOrders')) {
-            require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
+            require(JPATH_VM_ADMINISTRATOR . '/models/orders.php');
         }
-        $post_data = $_POST;
+        $post_data = $jinput->post->getArray();
         $order_number = $jinput->getString('on', 0);
 
         if (empty($post_data['trxid']) && empty($post_data['acquirerID']) && empty($post_data['invoiceID'])) { // Trxid not set
@@ -411,41 +413,17 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         die($log_msg);
     }
 
-
-//    public function plgVmOnCheckoutCheckDataPayment(VirtueMartCart $cart)
-//    {
-//        $currentMethod = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id);
-//        if (!$currentMethod) {
-//            return null; // Another method was selected, do nothing
-//        }
-//        if (!$this->selectedThisElement($currentMethod->payment_element)) {
-//            return null;
-//        }
-//
-//        if (false) {
-//            vmInfo(JText::_("Geen betaalvorm geselecteerd :" . $this->_currentMethod->payment_element));
-//            return false;
-//        }
-//    }
-
-
     /**
      * plgVmDisplayListFEPayment
      * This event is fired to display the pluginmethods in the cart (edit shipment/payment) for exampel
      *
-     * @param object $cart
-     *            Cart object
-     * @param integer $selected
-     *            ID of the method selected
+     * @param object $cart Cart object
+     * @param integer $selected ID of the method selected
      * @return boolean True on success, false on failures, null when this plugin was not selected.
-     *         On errors, JError::raiseWarning (or JError::raiseError) must be used to set a message.
-     *
-     * @author Valerie Isaksen
-     * @author Max Milbers
-     * @author Harry
      */
     public function plgVmDisplayListFEPayment(VirtueMartCart $cart, $selected = 0, &$htmlIn)
     {
+        $cart->automaticSelectedPayment = false;
         $html = $this->_getDigiwalletPluginHtml($cart, $selected);
         if (!empty($html)) {
             $htmlIn[] = [
@@ -496,11 +474,13 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
      */
     public function checkConditions($cart, $method, $cart_prices)
     {
-        if (!empty($_POST)) {
+        $jinput = JFactory::getApplication()->input;
+        $post_data = $jinput->post->getArray();
+        if (!empty($post_data)) {
             $session = JFactory::getSession();
             // set payment method to session
-            $digiwallet_method['payment_method'] = $_POST['digiwallet_method'];
-            $digiwallet_method['payment_method_option'] = $_POST['payment_option_select'][$_POST['digiwallet_method']];
+            $digiwallet_method['payment_method'] = $post_data['digiwallet_method'];
+            $digiwallet_method['payment_method_option'] = $post_data['payment_option_select'][$post_data['digiwallet_method']];
             $session->set('digiwallet_method', $digiwallet_method);
         }
         return true;
@@ -807,7 +787,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
             return '';
         }
         // note: strip out everything but numbers
-        $phone = preg_replace("/[^0-9]/", "", $phone);
+        $phone = self::getPhone($phone);
         $length = strlen($phone);
         switch ($length) {
             case 9:
@@ -833,7 +813,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
             return '';
         }
         // note: strip out everything but numbers
-        $phone = preg_replace("/[^0-9]/", "", $phone);
+        $phone = self::getPhone($phone);
         $length = strlen($phone);
         switch ($length) {
             case 9:
@@ -850,6 +830,12 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
                 return $phone;
                 break;
         }
+    }
+
+    private static function getPhone($phone)
+    {
+        $phone = preg_replace("/[^0-9]/", "", $phone);
+        return $phone;
     }
 
     private static function breakDownStreet($street)
@@ -956,14 +942,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
      */
     public function plgVmOnCheckAutomaticSelectedPayment(VirtueMartCart $cart, array $cart_prices = array(), &$paymentCounter)
     {
-        $virtuemart_pluginmethod_id = 0;
-        $nbMethod = $this->getSelectable($cart, $virtuemart_pluginmethod_id, $cart_prices);
-        if ($nbMethod == NULL) {
-            return NULL;
-        }
-        else {
-            return 0;
-        }
+        return $this->onCheckAutomaticSelected($cart, $cart_prices);
     }
 
     /**
