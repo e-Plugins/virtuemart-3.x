@@ -6,7 +6,7 @@
     <authorUrl>https://www.digiwallet.nl</authorUrl>
     <copyright>Copyright (C) 2018 DigiWallet</copyright>
     <license>http://www.gnu.org/copyleft/gpl.html GNU/GPL</license>
-    <version>4.0.3</version>
+    <version>4.0.4</version>
     <description><![CDATA[<a href="https://www.digiwallet.nl" target="_blank">DigiWallet</a> ... makes online payments easy.]]></description>
   
     <languages folder="language">
@@ -17,10 +17,13 @@
     <files>
         <filename plugin="digiwallet">digiwallet.php</filename>
         <filename>install.sql</filename>
-	<filename plugin="digiwallet">LICENSE</filename>
-	<filename plugin="digiwallet">README.md</filename>
-        <folder>digiwallet</folder>
-        <folder>language</folder>
+		<filename plugin="digiwallet">LICENSE</filename>
+		<filename plugin="digiwallet">README.md</filename>
+		<filename plugin="digiwallet">composer.json</filename>
+		<filename plugin="digiwallet">composer.lock</filename>
+	    <folder>digiwallet</folder>
+	    <folder>language</folder>
+	    <folder>vendor</folder>
     </files>
 
     <!-- No uninstall, if you click on uninstall by accident the shop will have an issue. Updates and modifications will be done in updates. -->
@@ -49,6 +52,7 @@
                 <field type="spacer" default="VMPAYMENT_DIGIWALLET_PAYMENT_WARNING"/>
             
                 <field name="digiwallet_rtlo" type="text" size="50" default="" label="VMPAYMENT_DIGIWALLET_RTLO" description="VMPAYMENT_DIGIWALLET_RTLO_DESC"/>
+                <field name="digiwallet_token" type="text" size="50" default="" label="VMPAYMENT_DIGIWALLET_TOKEN" description="VMPAYMENT_DIGIWALLET_TOKEN_DESC"/>
                     
                 <field type="spacer" default="VMPAYMENT_DIGIWALLET_PAYMENT_TITLE" level="level1"/>
                 <field type="spacer" default="VMPAYMENT_DIGIWALLET_PAYMENT_WARNING"/>
@@ -91,6 +95,16 @@
                 </field>
                 
                 <field name="digiwallet_enable_pyp" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_PYP" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_PYP_DESC">
+                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
+                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
+                </field>
+                
+                <field name="digiwallet_enable_eps" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_EPS" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_EPS_DESC">
+                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
+                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
+                </field>
+                
+                <field name="digiwallet_enable_gip" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_GIP" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_GIP_DESC">
                     <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
                     <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
                 </field>

@@ -5,9 +5,12 @@
  * @url https://www.digiwallet.nl
  * @copyright Copyright (C) 2018 - 2020 e-plugins.nl
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @ver 4.0.3 - 06-24-2020 set automaticSelectedPayment to false
+ * @ver 4.0.4 - 08-17-2020 add EPS & GIP payment methods
 */
 
+use Digiwallet\Packages\Transaction\Client\Client;
+use Digiwallet\Packages\Transaction\Client\Request\CreateTransaction;
+use Digiwallet\Packages\Transaction\Client\Request\CheckTransaction;
 use digiwallet\helpers\DigiwalletCore;
 
 defined('_JEXEC') or die('Restricted access');
@@ -15,14 +18,19 @@ if (!class_exists('vmPSPlugin')) {
     require(JPATH_VM_PLUGINS . '/vmpsplugin.php');
 }
 
+require(JPATH_ROOT . '/plugins/vmpayment/digiwallet/vendor/autoload.php');
+
 if (!class_exists('DigiwalletCore')) {
     require(JPATH_ROOT . '/plugins/vmpayment/digiwallet/digiwallet/helpers/digiwallet.class.php');
 }
 
 class plgVmpaymentDigiwallet extends vmPSPlugin
 {
+    const DIGIWALLET_API = 'https://api.digiwallet.nl/';
     const DIGIWALLET_CURRENCY = 'EUR';
     const DIGIWALLET_BANKWIRE_METHOD = 'BW';
+    const DIGIWALLET_EPS_METHOD = 'EPS';
+    const DIGIWALLET_GIP_METHOD = 'GIP';
 
     public $listMethods = array(
         "IDE" => array(
@@ -64,7 +72,14 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
             'name' => 'Bankwire',
             'min' => 0.84,
             'max' => 10000
+        ),
+        'EPS' => array(
+            'name' => 'EPS',
+        ),
+        'GIP' => array(
+            'name' => 'Giropay',
         )
+        
     );
 
     public static $_this = false;
@@ -85,6 +100,10 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
 
         $varsToPush = array(
             'digiwallet_rtlo' => array(
+                '',
+                'char'
+            ),
+            'digiwallet_token' => array(
                 '',
                 'char'
             ),
@@ -163,6 +182,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
      */
     public function plgVmConfirmedOrder($cart, $order)
     {
+        $bankId = $countryId = $transactionId = $bankUrl = null;
         $application = JFactory::getApplication();
         $jinput = $application->input;
         $post_data = $jinput->post->getArray();
@@ -208,36 +228,79 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         $order_number = $order['details']['BT']->order_number;
         $option = (!empty($post_data['payment_option_select'][$post_data['digiwallet_method']]) ? $post_data['payment_option_select'][$post_data['digiwallet_method']] : false);
         $description = 'Order id: ' . $order_number;
-        // start payment
-        $digiwalletObj = new DigiwalletCore($post_data['digiwallet_method'], $method->digiwallet_rtlo, 'nl');
-        if ($option) {
-            if ($digiwalletObj->getPayMethod() == 'IDE')
-                $digiwalletObj->setBankId($option);
-
-            if ($digiwalletObj->getPayMethod() == 'DEB')
-                $digiwalletObj->setCountryId($option);
-        }
-        $digiwalletObj->setAmount(($total * 100));
-        $digiwalletObj->setDescription($description);
         $returnUrl = JROUTE::_(JURI::root() . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' . $order_number . '&pm=' . $order['details']['BT']->virtuemart_paymentmethod_id);
         $reportUrl = JROUTE::_(JURI::root() . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginnotification&tmpl=component&on=' . $order_number);
-        $digiwalletObj->setReturnUrl($returnUrl);
-        $digiwalletObj->setReportUrl($reportUrl);
-        //add param email in start url
-        if (!empty($order['details']['BT']->email)) {
-            $digiwalletObj->bindParam('email', $order['details']['BT']->email);
+        
+        if (in_array($payment_method, array(self::DIGIWALLET_EPS_METHOD, self::DIGIWALLET_GIP_METHOD))) {
+            $digiwalletApi = new Client(self::DIGIWALLET_API);
+            $formParams = [
+                'outletId' => $method->digiwallet_rtlo,
+                'currencyCode' => $method->payment_currency,
+                'consumerEmail' => @$order['details']['BT']->email,
+                'description' => $description,
+                'returnUrl' => $returnUrl,
+                'reportUrl' => $reportUrl,
+                'consumerIp' => $this->getCustomerIP(),
+                'suggestedLanguage' => 'NLD',
+                'amountChangeable' => false,
+                'inputAmount' => $total * 100,
+                'paymentMethods' => [
+                    $payment_method
+                ],
+                'app_id' => DigiwalletCore::APP_ID
+            ];
+            
+            $request = new CreateTransaction($digiwalletApi, $formParams);
+            $request->withBearer($method->digiwallet_token);
+            /** @var \Digiwallet\Packages\Transaction\Client\Response\CreateTransaction $apiResult */
+            $apiResult = $request->send();
+            if ($apiResult->status() != 0) {
+                $message = $apiResult->message();
+                $this->sendEmailToVendorAndAdmins("Error with Digiwallet: ", $message);
+                $this->logInfo('Process IPN ' . $message);
+                vmError(JText::_('VMPAYMENT_DIGIWALLET_DISPLAY_GWERROR') . " " . $message);
+                $application->redirect('index.php?option=com_virtuemart&view=cart');
+                die;
+            }
+            
+            $transactionId = $apiResult->transactionId();
+            $bankUrl = $apiResult->launchUrl();
+        } else {
+            // start payment
+            $digiwalletObj = new DigiwalletCore($payment_method, $method->digiwallet_rtlo, 'nl');
+            if ($option) {
+                if ($digiwalletObj->getPayMethod() == 'IDE')
+                    $digiwalletObj->setBankId($option);
+    
+                if ($digiwalletObj->getPayMethod() == 'DEB')
+                    $digiwalletObj->setCountryId($option);
+            }
+            $digiwalletObj->setAmount(($total * 100));
+            $digiwalletObj->setDescription($description);
+            $digiwalletObj->setReturnUrl($returnUrl);
+            $digiwalletObj->setReportUrl($reportUrl);
+            //add param email in start url
+            if (!empty($order['details']['BT']->email)) {
+                $digiwalletObj->bindParam('email', $order['details']['BT']->email);
+            }
+            $this->additionalParameters($order, $digiwalletObj, $total);
+            $result = @$digiwalletObj->startPayment();
+            if (!$result) {
+                $message = $digiwalletObj->getErrorMessage();
+                $this->sendEmailToVendorAndAdmins("Error with Digiwallet: ", $message);
+                $this->logInfo('Process IPN ' . $message);
+                vmError(JText::_('VMPAYMENT_DIGIWALLET_DISPLAY_GWERROR') . " " . $message);
+                $application->redirect('index.php?option=com_virtuemart&view=cart');
+                die;
+            }
+            
+            $bankId = $digiwalletObj->getBankId();
+            $countryId = $digiwalletObj->getCountryId();
+            $transactionId = $digiwalletObj->getTransactionId();
+            $bankUrl = $digiwalletObj->getBankUrl();
         }
+        
 
-        $this->additionalParameters($order, $digiwalletObj, $total);
-
-        $result = @$digiwalletObj->startPayment();
-        if (!$result) {
-            $this->sendEmailToVendorAndAdmins("Error with Digiwallet: ", $digiwalletObj->getErrorMessage());
-            $this->logInfo('Process IPN ' . $digiwalletObj->getErrorMessage());
-            vmError(JText::_('VMPAYMENT_DIGIWALLET_DISPLAY_GWERROR') . " " . $digiwalletObj->getErrorMessage());
-            $application->redirect('index.php?option=com_virtuemart&view=cart');
-            die;
-        }
         // Prepare data that should be stored in Payment Digiwallet Table
         $dbValues = [];
         $dbValues['order_number'] = $order_number;
@@ -247,21 +310,21 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         $dbValues['payment_currency'] = $order['details']['BT']->order_currency;
         $dbValues['tp_rtlo'] = $method->digiwallet_rtlo;
         $dbValues['tp_user_session'] = $return_context;
-        $dbValues['tp_method'] = $digiwalletObj->getPayMethod();
-        $dbValues['tp_bank'] = $digiwalletObj->getBankId();
-        $dbValues['tp_country'] = $digiwalletObj->getCountryId();
-        $dbValues['tp_trxid'] = $digiwalletObj->getTransactionId();
+        $dbValues['tp_method'] = $payment_method;
+        $dbValues['tp_bank'] = $bankId;
+        $dbValues['tp_country'] = $countryId;
+        $dbValues['tp_trxid'] = $transactionId;
         $dbValues['tp_status'] = $method->status_pending;
         $dbValues['tp_message'] = Jtext::_('VMPAYMENT_DIGIWALLET_PAYMENT_PROCESSING');
         $this->storePSPluginInternalData($dbValues);
-        $this->logInfo('Transaction id: ' . $digiwalletObj->getTransactionId() . 'Payment Url:' . $digiwalletObj->getBankUrl(), 'message');
+        $this->logInfo('Transaction id: ' . $transactionId . 'Payment Url:' . $bankUrl, 'message');
 
         //show instruction page if method == bw
-        if ($digiwalletObj->getPayMethod() == self::DIGIWALLET_BANKWIRE_METHOD) {
+        if ($payment_method == self::DIGIWALLET_BANKWIRE_METHOD) {
             $html = $this->renderByLayout('bw_response', array(
                 'order_number' => $order['details']['BT']->order_number,
                 'order_pass' => $order['details']['BT']->order_pass,
-            	'payment_name' => @$listMethods[$digiwalletObj->getPayMethod()]['name'],
+                'payment_name' => @$listMethods[$payment_method]['name'],
                 'total' => $total,
             	'more' => $digiwalletObj->getMoreInformation(),
                 'billing_email' => $order['details']['BT']->email
@@ -276,7 +339,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
             $cart->_confirmDone = false;
             $cart->_dataValidated = false;
             $cart->setCartIntoSession();
-            $application->redirect($digiwalletObj->getBankUrl(), "");
+            $application->redirect($bankUrl, "");
         }
     }
 
@@ -367,10 +430,6 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         $post_data = $jinput->post->getArray();
         $order_number = $jinput->getString('on', 0);
 
-        if (empty($post_data['trxid']) && empty($post_data['acquirerID']) && empty($post_data['invoiceID'])) { // Trxid not set
-            die('error');
-        }
-
         if (!($virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number))) {
             $this->logInfo(__FUNCTION__ . ' Can\'t get VirtueMart order id', 'message');
             return false;
@@ -380,6 +439,32 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
 
             $this->logInfo('getDataByOrderId payment not found: exit ', 'ERROR');
             return;
+        }
+        $trxid = null;
+        $dw_method = $paymentTable->tp_method;
+        switch ($dw_method) {
+            case 'PYP':
+                $trxid = $post_data['acquirerID'];
+                break;
+            case 'AFP':
+                $trxid = $post_data['invoiceID'];
+                break;
+            case 'EPS':
+            case 'GIP':
+                $trxid = $post_data['transactionID'];
+                break;
+            case 'IDE':
+            case 'MRC':
+            case 'DEB':
+            case 'CC':
+            case 'WAL':
+            case 'BW':
+            default:
+                $trxid = $post_data['trxid'];
+        }
+        
+        if ($trxid != $paymentTable->tp_trxid) { // Trxid not set
+            die('error');
         }
         
         $method = $this->getVmPluginMethod($paymentTable->virtuemart_paymentmethod_id);
@@ -510,7 +595,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
                 /* remove unwanted paymethods */
                 foreach ($this->listMethods as $id => $method) {
                     $varName = 'digiwallet_enable_' . strtolower($id);
-                    if ($plugin->$varName == 1 && ($cartPrices <= $method['max'] && $cartPrices >= $method['min'])) {
+                    if ($plugin->$varName == 1 && (in_array($id, [self::DIGIWALLET_EPS_METHOD, self::DIGIWALLET_GIP_METHOD]) || ($cartPrices <= $method['max'] && $cartPrices >= $method['min']))) {
                         $bankArrByPaymentOption[$id] = $this->paymentArraySelection($id, $plugin->digiwallet_rtlo);
                     }
                 }
@@ -555,6 +640,8 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
             case "BW":
             case "PYP":
             case "AFP":
+            case self::DIGIWALLET_EPS_METHOD:
+            case self::DIGIWALLET_GIP_METHOD:
                 return array($method => $method);
                 break;
             default:
@@ -609,11 +696,28 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
      */
     public function _updatePaymentInfo($paymentTable, $method, $post_data = array())
     {
-        $digiwalletObj = new DigiwalletCore($paymentTable->tp_method, $paymentTable->tp_rtlo, 'nl');
-        $trxid = $paymentTable->tp_trxid;
-
-        $digiwalletObj->checkPayment($trxid, $this->getAdditionParametersReport($paymentTable));
-        if ($digiwalletObj->getPaidStatus()) { //success
+        $isSuccess = false;
+        $errorMessage = null;
+        
+        if (in_array($paymentTable->tp_method, array(self::DIGIWALLET_EPS_METHOD, self::DIGIWALLET_GIP_METHOD))) {
+            $digiwalletApi = new Client(self::DIGIWALLET_API);
+            $request = new CheckTransaction($digiwalletApi);
+            $request->withBearer($method->digiwallet_token);
+            $request->withOutlet($method->digiwallet_rtlo);
+            $request->withTransactionId($paymentTable->tp_trxid);
+            /** @var \Digiwallet\Packages\Transaction\Client\Response\CheckTransaction $apiResult */
+            $apiResult = $request->send();
+            $isSuccess = ($apiResult->getStatus() == 0 && $apiResult->getTransactionStatus() == 'Completed') ? true : false;
+            $errorMessage = $apiResult->getMessage();
+        } else {
+            $digiwalletObj = new DigiwalletCore($paymentTable->tp_method, $paymentTable->tp_rtlo, 'nl');
+            $trxid = $paymentTable->tp_trxid;
+            $digiwalletObj->checkPayment($trxid, $this->getAdditionParametersReport($paymentTable));
+            $isSuccess = $digiwalletObj->getPaidStatus();
+            $errorMessage = $digiwalletObj->getErrorMessage();
+        }
+        
+        if ($isSuccess) { //success
             $amountPaid = $paymentTable->payment_order_total;
             if ($paymentTable->tp_method == self::DIGIWALLET_BANKWIRE_METHOD) {
                 $paymentIsPartial = false;
@@ -644,7 +748,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         }
         else {
             $paymentTable->tp_status = $method->status_canceled;
-            $paymentTable->tp_message = $digiwalletObj->getErrorMessage();
+            $paymentTable->tp_message = $errorMessage;
             $comments = JText::sprintf('VMPAYMENT_DIGIWALLET_PAYMENT_CANCELLED', $paymentTable->order_number);
         }
         $this->_storeInternalData($method, $paymentTable, $post_data);
@@ -687,6 +791,8 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
             case 'CC':
             case 'WAL':
             case 'PYP':
+            case self::DIGIWALLET_EPS_METHOD:
+            case self::DIGIWALLET_GIP_METHOD:
                 break;
             case 'BW':
                 $digiwalletObj->bindParam('salt', $this->salt);
@@ -879,6 +985,24 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         return $param;
     }
 
+    /***
+     * Get user's ip address
+     * @return mixed
+     */
+    public function getCustomerIP()
+    {
+        if(!empty($_SERVER['HTTP_CLIENT_IP'])){
+            //ip from share internet
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        }elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
+            //ip pass from proxy
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }else{
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
+    }
+    
     /**
      * Create the table for this plugin if it does not yet exist.
      * This functions checks if the called plugin is active one.
