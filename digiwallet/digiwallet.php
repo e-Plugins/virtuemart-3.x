@@ -5,7 +5,7 @@
  * @url https://www.digiwallet.nl
  * @copyright Copyright (C) 2018 - 2020 e-plugins.nl
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @ver 4.0.4 - 08-17-2020 add EPS & GIP payment methods
+ * @ver 4.0.6 - 04-11-2020 update Ideal logo
 */
 
 use Digiwallet\Packages\Transaction\Client\Client;
@@ -994,9 +994,6 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
         if(!empty($_SERVER['HTTP_CLIENT_IP'])){
             //ip from share internet
             $ip = $_SERVER['HTTP_CLIENT_IP'];
-        }elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
-            //ip pass from proxy
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         }else{
             $ip = $_SERVER['REMOTE_ADDR'];
         }

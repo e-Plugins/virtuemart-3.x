@@ -13,7 +13,7 @@ defined ('_JEXEC') or die();
 
 class DigiwalletCore
 {
-    const APP_ID = "dw_virtuemart3.x_4.0.4";
+    const APP_ID = "dw_virtuemart3.x_4.0.6";
 
     // Constants
     const MIN_AMOUNT            = 84;
