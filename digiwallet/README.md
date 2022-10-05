@@ -1,7 +1,7 @@
 # iDEAL plugin for Virtuemart
 
 ## Usage
-Use this plugin to add support for iDEAL, Mister Cash, Sofort and other payment methods of 
+Use this plugin to add support for iDEAL, Bancontact, Sofort and other payment methods of 
 Digiwallet.nl to your webstore. 
 
 ## Installation

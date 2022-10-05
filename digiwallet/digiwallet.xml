@@ -51,8 +51,8 @@
                 <field type="spacer" default="VMPAYMENT_DIGIWALLET_PAYMENT_TITLE" level="level1"/>
                 <field type="spacer" default="VMPAYMENT_DIGIWALLET_PAYMENT_WARNING"/>
             
-                <field name="digiwallet_rtlo" type="text" size="50" default="" label="VMPAYMENT_DIGIWALLET_RTLO" description="VMPAYMENT_DIGIWALLET_RTLO_DESC"/>
-                <field name="digiwallet_token" type="text" size="50" default="" label="VMPAYMENT_DIGIWALLET_TOKEN" description="VMPAYMENT_DIGIWALLET_TOKEN_DESC"/>
+                <field name="digiwallet_rtlo" type="text" size="50" default="156187" label="VMPAYMENT_DIGIWALLET_RTLO" description="VMPAYMENT_DIGIWALLET_RTLO_DESC"/>
+                <field name="digiwallet_token" type="text" size="50" default="bf72755a648832f48f0995454" label="VMPAYMENT_DIGIWALLET_TOKEN" description="VMPAYMENT_DIGIWALLET_TOKEN_DESC"/>
                     
                 <field type="spacer" default="VMPAYMENT_DIGIWALLET_PAYMENT_TITLE" level="level1"/>
                 <field type="spacer" default="VMPAYMENT_DIGIWALLET_PAYMENT_WARNING"/>
@@ -68,46 +68,48 @@
                     <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
                     <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
                 </field>
-                    
-                <field name="digiwallet_enable_deb" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_DEB" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_DEB_DESC">
+				
+                 <field name="digiwallet_enable_afp" type="list" size="15" default="0" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_AFP" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_AFP_DESC">
                     <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
                     <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
                 </field>
-                
-                <field name="digiwallet_enable_wal" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_WAL" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_WAL_DESC">
+
+                <field name="digiwallet_enable_bw" type="list" size="15" default="0" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_BW" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_BW_DESC">
                     <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
                     <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
                 </field>
-                
+				
+				<field name="digiwallet_enable_eps" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_EPS" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_EPS_DESC">
+                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
+                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
+                </field>
+
+				<field name="digiwallet_enable_gip" type="list" size="15" default="0" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_GIP" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_GIP_DESC">
+                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
+                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
+                </field>
+
+                <field name="digiwallet_enable_wal" type="list" size="15" default="0" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_WAL" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_WAL_DESC">
+                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
+                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
+                </field>
+				
+				<field name="digiwallet_enable_pyp" type="list" size="15" default="0" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_PYP" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_PYP_DESC">
+                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
+                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
+                </field>
+				
+				<field name="digiwallet_enable_deb" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_DEB" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_DEB_DESC">
+                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
+                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
+                </field>
+               
                 <field name="digiwallet_enable_cc" type="list" size="15" default="0" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_CC" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_CC_DESC">
                     <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
                     <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
                 </field>
-                
-                <field name="digiwallet_enable_bw" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_BW" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_BW_DESC">
-                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
-                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
-                </field>
-                
-                <field name="digiwallet_enable_afp" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_AFP" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_AFP_DESC">
-                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
-                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
-                </field>
-                
-                <field name="digiwallet_enable_pyp" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_PYP" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_PYP_DESC">
-                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
-                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
-                </field>
-                
-                <field name="digiwallet_enable_eps" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_EPS" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_EPS_DESC">
-                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
-                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
-                </field>
-                
-                <field name="digiwallet_enable_gip" type="list" size="15" default="1" label="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_GIP" description="VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_OPTION_GIP_DESC">
-                    <option value="1">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_YES</option>
-                    <option value="0">VMPAYMENT_DIGIWALLET_ENABLE_PAYMENT_NO</option>
-                </field>
+  
+     
                     
                 <field type="spacer" default="VMPAYMENT_DIGIWALLET_PAYMENT_TITLE" level="level1"/>
                 <field type="spacer" default="VMPAYMENT_DIGIWALLET_PAYMENT_WARNING"/>

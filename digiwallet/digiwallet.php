@@ -44,7 +44,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
             'max' => 10000
         ),
         "DEB" => array(
-            'name' => 'Sofort Banking',
+            'name' => 'Sofort',
             'min' => 0.1,
             'max' => 5000
         ),
@@ -69,7 +69,7 @@ class plgVmpaymentDigiwallet extends vmPSPlugin
             'max' => 10000
         ),
         'BW' => array(
-            'name' => 'Bankwire',
+            'name' => 'Bankwire - Overschrijving',
             'min' => 0.84,
             'max' => 10000
         ),
