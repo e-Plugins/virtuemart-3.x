@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <extension version="3.1" type="plugin" group="vmpayment" >
     <name>Vmpayment - DigiWallet for iDeal, Bancontact, Sofort, Creditcard</name>
-    <creationDate>April 2018</creationDate>
+    <creationDate>October 2022</creationDate>
     <author>DigiWallet.nl</author>
     <authorUrl>https://www.digiwallet.nl</authorUrl>
     <copyright>Copyright (C) 2018 DigiWallet</copyright>
     <license>http://www.gnu.org/copyleft/gpl.html GNU/GPL</license>
-    <version>4.0.6</version>
+    <version>4.1.0</version>
     <description><![CDATA[<a href="https://www.digiwallet.nl" target="_blank">DigiWallet</a> ... makes online payments easy.]]></description>
   
     <languages folder="language">

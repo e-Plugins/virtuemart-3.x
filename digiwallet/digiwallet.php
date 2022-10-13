@@ -5,7 +5,7 @@
  * @url https://www.digiwallet.nl
  * @copyright Copyright (C) 2018 - 2020 e-plugins.nl
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @ver 4.0.6 - 04-11-2020 update Ideal logo
+ * @ver 4.1. - 10-10-2022 update Afterpay logo
 */
 
 use Digiwallet\Packages\Transaction\Client\Client;
