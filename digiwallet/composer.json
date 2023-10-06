@@ -1,5 +1,0 @@
-{
-    "require": {
-        "digiwallet/transaction-client": "^1.0"
-    }
-}
